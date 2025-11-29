@@ -90,8 +90,7 @@
                              VerticalContentAlignment="Center"
                              Background="White"
                              BorderBrush="#BDC3C7"
-                             BorderThickness="1"
-                             CornerRadius="3">
+                             BorderThickness="1">
                         <TextBox.Style>
                             <Style TargetType="TextBox">
                                 <Style.Triggers>
@@ -230,11 +229,7 @@
                                         Command="{Binding EditEmployeeCommand}"
                                         Style="{StaticResource ActionButtonStyle}"
                                         Background="#F39C12"/>
-                                <Button Content="📞 Позвонить" 
-                                        Command="{Binding CallEmployeeCommand}"
-                                        Style="{StaticResource ActionButtonStyle}"
-                                        Background="#27AE60"
-                                        Margin="5,0,0,0"/>
+                                
                             </StackPanel>
                         </Grid>
                     </Border>

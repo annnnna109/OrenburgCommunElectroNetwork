@@ -1,26 +1,28 @@
-﻿using System;
+﻿using OrenburgCommunElectroNetwork.Common;
+using OrenburgCommunElectroNetwork.ViewModels;
+using OrenburgCommunElectroNetwork.Views;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Input;
-using OrenburgCommunElectroNetwork.Common;
-using OrenburgCommunElectroNetwork.ViewModels;
 
 namespace OrenburgCommunElectroNetwork.ViewModels
 {
     public class MainViewModel : ViewModelBase
     {
-        private ViewModelBase _currentViewModel;
+        private object _currentContent;
         private string _currentUserName;
         private string _statusMessage;
         private DateTime _currentDateTime;
         private bool _isAdmin;
 
-        public ViewModelBase CurrentViewModel
+        public object CurrentContent
         {
-            get => _currentViewModel;
-            set => SetProperty(ref _currentViewModel, value);
+            get => _currentContent;
+            set => SetProperty(ref _currentContent, value);
         }
 
         public string CurrentUserName
@@ -59,32 +61,97 @@ namespace OrenburgCommunElectroNetwork.ViewModels
             NavigateToCalendarCommand = new RelayCommand(_ => NavigateToCalendar());
             NavigateToAdminCommand = new RelayCommand(_ => NavigateToAdmin());
 
-            NavigateToDirectory();
-
+            // Set initial values
             CurrentUserName = "Иванов И.И.";
             StatusMessage = "Готово";
             CurrentDateTime = DateTime.Now;
-            IsAdmin = true; 
+            IsAdmin = true; // For testing
+
+            // Show welcome message
+            ShowWelcomeMessage();
+        }
+
+        private void ShowWelcomeMessage()
+        {
+            CurrentContent = new StackPanel
+            {
+                Children =
+                {
+                    new TextBlock
+                    {
+                        Text = "Добро пожаловать в корпоративный портал",
+                        FontSize = 20,
+                        FontWeight = System.Windows.FontWeights.Bold,
+                        Foreground = System.Windows.Media.Brushes.DarkSlateGray,
+                        TextAlignment = System.Windows.TextAlignment.Center,
+                        Margin = new System.Windows.Thickness(0, 0, 0, 20)
+                    },
+                    new TextBlock
+                    {
+                        Text = "АО 'Оренбургкоммунэлектросеть'",
+                        FontSize = 16,
+                        Foreground = System.Windows.Media.Brushes.Gray,
+                        TextAlignment = System.Windows.TextAlignment.Center
+                    },
+                    new TextBlock
+                    {
+                        Text = "Выберите раздел в меню слева для работы",
+                        FontSize = 14,
+                        Foreground = System.Windows.Media.Brushes.DarkGray,
+                        TextAlignment = System.Windows.TextAlignment.Center,
+                        Margin = new System.Windows.Thickness(0, 20, 0, 0)
+                    }
+                },
+                HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
+                VerticalAlignment = System.Windows.VerticalAlignment.Center
+            };
+            StatusMessage = "Главная страница";
         }
 
         private void NavigateToDirectory()
         {
-            CurrentViewModel = new EmployeeDirectoryViewModel();
-            StatusMessage = "Справочник сотрудников";
+            // Открываем окно справочника сотрудников
+            var directoryView = new EmployeeDirectoryView();
+            directoryView.Owner = System.Windows.Application.Current.MainWindow;
+            directoryView.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterOwner;
+            directoryView.Show();
+
+            StatusMessage = "Открыт справочник сотрудников";
         }
 
         private void NavigateToNews()
         {
+            CurrentContent = new TextBlock
+            {
+                Text = "Новостная лента - в разработке",
+                FontSize = 18,
+                HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
+                VerticalAlignment = System.Windows.VerticalAlignment.Center
+            };
             StatusMessage = "Новостная лента";
         }
 
         private void NavigateToCalendar()
         {
+            CurrentContent = new TextBlock
+            {
+                Text = "Календарь событий - в разработке",
+                FontSize = 18,
+                HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
+                VerticalAlignment = System.Windows.VerticalAlignment.Center
+            };
             StatusMessage = "Календарь событий";
         }
 
         private void NavigateToAdmin()
         {
+            CurrentContent = new TextBlock
+            {
+                Text = "Панель администратора - в разработке",
+                FontSize = 18,
+                HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
+                VerticalAlignment = System.Windows.VerticalAlignment.Center
+            };
             StatusMessage = "Панель администратора";
         }
     }
