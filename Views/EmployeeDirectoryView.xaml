@@ -1,0 +1,422 @@
+﻿<Window x:Class="OrenburgCommunElectroNetwork.Views.EmployeeDirectoryView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Справочник сотрудников - АО 'Оренбургкоммунэлектросеть'" 
+        Height="700" Width="1000"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <Style x:Key="HeaderTextStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#2C3E50"/>
+        </Style>
+
+        <Style x:Key="LabelTextStyle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#34495E"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="ValueTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#2C3E50"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="ActionButtonStyle" TargetType="Button">
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Background" Value="#3498DB"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#2980B9"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="EmployeeListItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="12"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Margin" Value="2"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#F8F9FA"/>
+                    <Setter Property="BorderBrush" Value="#E9ECEF"/>
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#E3F2FD"/>
+                    <Setter Property="BorderBrush" Value="#2196F3"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </Window.Resources>
+
+    <Grid Background="#F8F9FA">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Заголовок и поиск -->
+        <Border Grid.Row="0" Background="#2C3E50" Padding="15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="📋" FontSize="20" Margin="0,0,10,0"/>
+                    <TextBlock Text="Справочник сотрудников" 
+                               Foreground="White" 
+                               FontSize="18" 
+                               FontWeight="Bold"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <TextBox x:Name="SearchTextBox" 
+                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                             Width="300"
+                             Padding="12,8"
+                             FontSize="14"
+                             VerticalContentAlignment="Center"
+                             Background="White"
+                             BorderBrush="#BDC3C7"
+                             BorderThickness="1"
+                             CornerRadius="3">
+                        <TextBox.Style>
+                            <Style TargetType="TextBox">
+                                <Style.Triggers>
+                                    <Trigger Property="Text" Value="">
+                                        <Setter Property="Foreground" Value="#7F8C8D"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
+
+                    <ComboBox x:Name="DepartmentComboBox"
+                              ItemsSource="{Binding Departments}"
+                              DisplayMemberPath="Name"
+                              SelectedItem="{Binding SelectedDepartment}"
+                              Width="200"
+                              Margin="10,0,0,0"
+                              Padding="8"
+                              FontSize="14"
+                              Background="White"
+                              BorderBrush="#BDC3C7"/>
+                </StackPanel>
+
+                <!-- Кнопки действий -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Button Content="Очистить" 
+                            Command="{Binding ClearSearchCommand}"
+                            Style="{StaticResource ActionButtonStyle}"
+                            Background="#95A5A6"/>
+                    <Button Content="Обновить" 
+                            Command="{Binding RefreshCommand}"
+                            Style="{StaticResource ActionButtonStyle}"
+                            Background="#27AE60"
+                            Margin="10,0,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Основное содержимое -->
+        <Grid Grid.Row="1" Margin="15">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="7*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Список сотрудников -->
+            <Border Grid.Column="0" 
+                    Background="White" 
+                    BorderBrush="#DEE2E6" 
+                    BorderThickness="1"
+                    CornerRadius="5"
+                    Margin="0,0,10,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" 
+                            Background="#ECF0F1" 
+                            Padding="12"
+                            BorderBrush="#DEE2E6" 
+                            BorderThickness="0,0,0,1"
+                            CornerRadius="5,5,0,0">
+                        <TextBlock Text="Сотрудники" 
+                                   Style="{StaticResource HeaderTextStyle}"/>
+                    </Border>
+
+                    <ListBox Grid.Row="1" 
+                             x:Name="EmployeesListBox"
+                             ItemsSource="{Binding Employees}"
+                             SelectedItem="{Binding SelectedEmployee}"
+                             ItemContainerStyle="{StaticResource EmployeeListItemStyle}"
+                             BorderThickness="0"
+                             Background="Transparent"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="5">
+                                    <TextBlock Text="{Binding FullName}" 
+                                               FontWeight="SemiBold" 
+                                               FontSize="14"
+                                               Foreground="#2C3E50"/>
+                                    <TextBlock Text="{Binding Position}" 
+                                               Foreground="#7F8C8D" 
+                                               FontSize="12"
+                                               Margin="0,2,0,0"/>
+                                    <TextBlock Text="{Binding DepartmentId, StringFormat='Отдел: {0}'}" 
+                                               Foreground="#3498DB" 
+                                               FontSize="11"
+                                               Margin="0,1,0,0"/>
+                                    <TextBlock Text="{Binding Phone}" 
+                                               Foreground="#95A5A6" 
+                                               FontSize="11"
+                                               Margin="0,1,0,0"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+
+            <!-- Детальная информация -->
+            <Border Grid.Column="1" 
+                    Background="White" 
+                    BorderBrush="#DEE2E6" 
+                    BorderThickness="1"
+                    CornerRadius="5">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Заголовок деталей -->
+                    <Border Grid.Row="0" 
+                            Background="#ECF0F1" 
+                            Padding="15"
+                            BorderBrush="#DEE2E6" 
+                            BorderThickness="0,0,0,1"
+                            CornerRadius="5,5,0,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" 
+                                       Text="Информация о сотруднике" 
+                                       Style="{StaticResource HeaderTextStyle}"
+                                       VerticalAlignment="Center"/>
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <Button Content="✏️ Редактировать" 
+                                        Command="{Binding EditEmployeeCommand}"
+                                        Style="{StaticResource ActionButtonStyle}"
+                                        Background="#F39C12"/>
+                                <Button Content="📞 Позвонить" 
+                                        Command="{Binding CallEmployeeCommand}"
+                                        Style="{StaticResource ActionButtonStyle}"
+                                        Background="#27AE60"
+                                        Margin="5,0,0,0"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Детали сотрудника -->
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="20">
+
+                            <!-- Основная информация -->
+                            <Border Background="#F8F9FA" 
+                                    Padding="15" 
+                                    CornerRadius="5"
+                                    Margin="0,0,0,15">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" 
+                                               Text="ФИО:" 
+                                               Style="{StaticResource LabelTextStyle}"
+                                               Margin="0,0,15,10"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="1" 
+                                               Text="{Binding SelectedEmployee.FullName}" 
+                                               Style="{StaticResource ValueTextStyle}"
+                                               FontSize="16"
+                                               Margin="0,0,0,10"/>
+
+                                    <TextBlock Grid.Row="1" Grid.Column="0" 
+                                               Text="Должность:" 
+                                               Style="{StaticResource LabelTextStyle}"
+                                               Margin="0,0,15,10"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" 
+                                               Text="{Binding SelectedEmployee.Position}" 
+                                               Style="{StaticResource ValueTextStyle}"
+                                               Margin="0,0,0,10"/>
+
+                                    <TextBlock Grid.Row="2" Grid.Column="0" 
+                                               Text="Отдел:" 
+                                               Style="{StaticResource LabelTextStyle}"
+                                               Margin="0,0,15,0"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" 
+                                               Text="{Binding SelectedEmployee.DepartmentId, StringFormat='Отдел №{0}'}" 
+                                               Style="{StaticResource ValueTextStyle}"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- Контактная информация -->
+                            <Border Background="#F8F9FA" 
+                                    Padding="15" 
+                                    CornerRadius="5"
+                                    Margin="0,0,0,15">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" 
+                                               Text="📞 Рабочий телефон:" 
+                                               Style="{StaticResource LabelTextStyle}"
+                                               Margin="0,0,15,8"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="1" 
+                                               Text="{Binding SelectedEmployee.Phone}" 
+                                               Style="{StaticResource ValueTextStyle}"
+                                               Margin="0,0,0,8"/>
+
+                                    <TextBlock Grid.Row="1" Grid.Column="0" 
+                                               Text="📱 Мобильный:" 
+                                               Style="{StaticResource LabelTextStyle}"
+                                               Margin="0,0,15,8"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" 
+                                               Text="{Binding SelectedEmployee.MobilePhone}" 
+                                               Style="{StaticResource ValueTextStyle}"
+                                               Margin="0,0,0,8"/>
+
+                                    <TextBlock Grid.Row="2" Grid.Column="0" 
+                                               Text="📧 Email:" 
+                                               Style="{StaticResource LabelTextStyle}"
+                                               Margin="0,0,15,8"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" 
+                                               Text="{Binding SelectedEmployee.Email}" 
+                                               Style="{StaticResource ValueTextStyle}"
+                                               Margin="0,0,0,8"/>
+
+                                    <TextBlock Grid.Row="3" Grid.Column="0" 
+                                               Text="🚪 Кабинет:" 
+                                               Style="{StaticResource LabelTextStyle}"
+                                               Margin="0,0,15,0"/>
+                                    <TextBlock Grid.Row="3" Grid.Column="1" 
+                                               Text="{Binding SelectedEmployee.Cabinet}" 
+                                               Style="{StaticResource ValueTextStyle}"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- Дополнительная информация -->
+                            <Border Background="#F8F9FA" 
+                                    Padding="15" 
+                                    CornerRadius="5">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" 
+                                               Text="👤 Статус:" 
+                                               Style="{StaticResource LabelTextStyle}"
+                                               Margin="0,0,15,8"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="1" 
+                                               Text="{Binding SelectedEmployee.IsActive, Converter={StaticResource BooleanToVisibilityConverter}}" 
+                                               Style="{StaticResource ValueTextStyle}"
+                                               Margin="0,0,0,8"/>
+
+                                    <TextBlock Grid.Row="1" Grid.Column="0" 
+                                               Text="📅 Дата регистрации:" 
+                                               Style="{StaticResource LabelTextStyle}"
+                                               Margin="0,0,15,0"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" 
+                                               Text="{Binding SelectedEmployee.CreatedAt, StringFormat='dd.MM.yyyy'}" 
+                                               Style="{StaticResource ValueTextStyle}"/>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- Статус бар -->
+                    <Border Grid.Row="2" 
+                            Background="#ECF0F1" 
+                            Padding="10"
+                            BorderBrush="#DEE2E6" 
+                            BorderThickness="0,1,0,0"
+                            CornerRadius="0,0,5,5">
+                        <TextBlock Text="{Binding StatusMessage}" 
+                                   Foreground="#7F8C8D"
+                                   FontSize="12"/>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Нижняя панель -->
+        <Border Grid.Row="2" Background="#34495E" Padding="10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" 
+                           Text="{Binding EmployeesCount, StringFormat='Найдено сотрудников: {0}'}" 
+                           Foreground="White"
+                           VerticalAlignment="Center"/>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button Content="➕ Добавить сотрудника" 
+                            Command="{Binding AddEmployeeCommand}"
+                            Style="{StaticResource ActionButtonStyle}"
+                            Background="#27AE60"/>
+                    <Button Content="❌ Закрыть" 
+                            Click="CloseButton_Click"
+                            Style="{StaticResource ActionButtonStyle}"
+                            Background="#E74C3C"
+                            Margin="10,0,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
