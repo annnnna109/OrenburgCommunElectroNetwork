@@ -1,0 +1,232 @@
+﻿<Window x:Class="OrenburgCommunElectroNetwork.Views.CalendarWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Календарь - АО 'Оренбургкоммунэлектросеть'"
+        Height="800" Width="1000"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <Style x:Key="HeaderTextStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#2C3E50"/>
+        </Style>
+
+        <Style x:Key="LabelTextStyle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#34495E"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="ValueTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#2C3E50"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="ActionButtonStyle" TargetType="Button">
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Background" Value="#3498DB"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#2980B9"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="CalendarDayStyle" TargetType="Button">
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#DEE2E6"/>
+            <Setter Property="Background" Value="White"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#E3F2FD"/>
+                    <Setter Property="BorderBrush" Value="#2196F3"/>
+                </Trigger>
+                <DataTrigger Binding="{Binding IsToday}" Value="True">
+                    <Setter Property="Background" Value="#FFF9C4"/>
+                    <Setter Property="BorderBrush" Value="#FFEB3B"/>
+                    <Setter Property="FontWeight" Value="Bold"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding HasNote}" Value="True">
+                    <Setter Property="Background" Value="{Binding NoteColor}"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid Background="#F8F9FA">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="#2C3E50" Padding="15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="📅" FontSize="20" Margin="0,0,10,0"/>
+                    <TextBlock Text="Календарь" 
+                               Foreground="White"
+                               FontSize="18"
+                               FontWeight="Bold"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <ComboBox x:Name="MonthComboBox"
+                              ItemsSource="{Binding Months}"
+                              SelectedItem="{Binding SelectedMonth}"
+                              DisplayMemberPath="Name"
+                              Width="120"
+                              Margin="0,0,15,0"
+                              Padding="8"
+                              FontSize="14"
+                              Background="White"
+                              BorderBrush="#BDC3C7"/>
+
+                    <ComboBox x:Name="YearComboBox"
+                              ItemsSource="{Binding Years}"
+                              SelectedItem="{Binding SelectedYear}"
+                              Width="80"
+                              Padding="8"
+                              FontSize="14"
+                              Background="White"
+                              BorderBrush="#BDC3C7"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Button Content="➕ Новая заметка"
+                            Command="{Binding AddNoteCommand}"
+                            Style="{StaticResource ActionButtonStyle}"
+                            Background="#27AE60"/>
+                    <Button Content="🔄 Обновить"
+                            Command="{Binding RefreshCommand}"
+                            Style="{StaticResource ActionButtonStyle}"
+                            Background="#95A5A6"
+                            Margin="10,0,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Календарь -->
+        <Grid Grid.Row="1" Margin="15">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Дни недели -->
+            <UniformGrid Grid.Row="0" Rows="1" Columns="7" Background="#ECF0F1">
+                <TextBlock Text="Пн" Style="{StaticResource HeaderTextStyle}" TextAlignment="Center" Padding="5"/>
+                <TextBlock Text="Вт" Style="{StaticResource HeaderTextStyle}" TextAlignment="Center" Padding="5"/>
+                <TextBlock Text="Ср" Style="{StaticResource HeaderTextStyle}" TextAlignment="Center" Padding="5"/>
+                <TextBlock Text="Чт" Style="{StaticResource HeaderTextStyle}" TextAlignment="Center" Padding="5"/>
+                <TextBlock Text="Пт" Style="{StaticResource HeaderTextStyle}" TextAlignment="Center" Padding="5"/>
+                <TextBlock Text="Сб" Style="{StaticResource HeaderTextStyle}" TextAlignment="Center" Padding="5"/>
+                <TextBlock Text="Вс" Style="{StaticResource HeaderTextStyle}" TextAlignment="Center" Padding="5"/>
+            </UniformGrid>
+
+            <!-- Сетка дат -->
+            <ItemsControl Grid.Row="1" ItemsSource="{Binding CalendarDays}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Rows="6" Columns="7"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Button Content="{Binding DayNumber}"
+                                Style="{StaticResource CalendarDayStyle}"
+                                Command="{Binding DataContext.SelectDayCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                CommandParameter="{Binding}"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Grid>
+
+        <!-- Панель заметок -->
+        <Border Grid.Row="2" Background="White" BorderBrush="#DEE2E6" BorderThickness="1" CornerRadius="5" Margin="15,0,15,15">
+            <Grid Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="Заметки на выбранную дату:" 
+                   Style="{StaticResource HeaderTextStyle}" Margin="0,0,0,10"/>
+
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding SelectedDayNotes}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{Binding NoteColorBrush}" 
+                                CornerRadius="5" Margin="0,0,0,10" Padding="10">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                            <TextBlock Text="{Binding Date, StringFormat='dd.MM.yyyy'}" 
+                                               FontWeight="Bold" Foreground="White" Margin="0,0,10,0"/>
+                                            <TextBlock Text="(Сегодня)" Foreground="White" 
+                                               Visibility="{Binding IsToday, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                        </StackPanel>
+
+                                        <TextBlock Grid.Row="1" Text="{Binding NoteText}" 
+                                           Foreground="White" Margin="0,10,0,10"
+                                           TextWrapping="Wrap"/>
+
+                                        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                                            <Button Content="✏️ Редактировать" 
+                                            Command="{Binding DataContext.EditNoteCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}"
+                                            Style="{StaticResource ActionButtonStyle}"
+                                            Background="#3498DB" Padding="8,4"/>
+
+                                            <Button Content="🎨 Цвет" 
+                                            Command="{Binding DataContext.ChangeColorCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="LightBlue"
+                                            Style="{StaticResource ActionButtonStyle}"
+                                            Background="#9B59B6" Padding="8,4" Margin="5,0,0,0"/>
+
+                                            <Button Content="🗑️ Удалить" 
+                                            Command="{Binding DataContext.DeleteNoteCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}"
+                                            Style="{StaticResource ActionButtonStyle}"
+                                            Background="#E74C3C" Padding="8,4" Margin="5,0,0,0"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <TextBlock Grid.Row="2" Text="Нет заметок для выбранной даты" 
+                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                   FontStyle="Italic" Foreground="Gray"
+                   Visibility="{Binding SelectedDayNotes.Count, Converter={StaticResource CountToVisibilityConverter}}"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

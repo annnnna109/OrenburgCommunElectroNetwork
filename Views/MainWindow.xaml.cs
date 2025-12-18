@@ -23,5 +23,19 @@ namespace OrenburgCommunElectroNetwork.Views
             InitializeComponent();
             DataContext = new MainViewModel();
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            EmployeeDirectoryView employeeDirView = new EmployeeDirectoryView();
+            employeeDirView.Show();
+            
+
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            CalendarWindow calendarWindow = new CalendarWindow();
+            calendarWindow.Show();
+        }
     }
 }

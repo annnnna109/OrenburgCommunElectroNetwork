@@ -60,24 +60,34 @@ namespace OrenburgCommunElectroNetwork.ViewModels
             NavigateToNewsCommand = new RelayCommand(_ => NavigateToNews());
             NavigateToCalendarCommand = new RelayCommand(_ => NavigateToCalendar());
             NavigateToAdminCommand = new RelayCommand(_ => NavigateToAdmin());
+            LoadUserInfo();
+            ShowWelcomeMessage();
+        }
 
-            // Set initial values
-            CurrentUserName = "Иванов И.И.";
+        private void LoadUserInfo()
+        {
+            if (System.Windows.Application.Current.Properties["CurrentUser"] is UserInfo userInfo)
+            {
+                CurrentUserName = userInfo.FullName;
+                IsAdmin = userInfo.IsAdmin;
+            }
+            else
+            {
+                CurrentUserName = "Пользователь";
+                IsAdmin = false;
+            }
+
             StatusMessage = "Готово";
             CurrentDateTime = DateTime.Now;
-            IsAdmin = true; // For testing
-
-            // Show welcome message
-            ShowWelcomeMessage();
         }
 
         private void ShowWelcomeMessage()
         {
-            CurrentContent = new StackPanel
+            CurrentContent = new System.Windows.Controls.StackPanel
             {
                 Children =
                 {
-                    new TextBlock
+                    new System.Windows.Controls.TextBlock
                     {
                         Text = "Добро пожаловать в корпоративный портал",
                         FontSize = 20,
@@ -86,14 +96,14 @@ namespace OrenburgCommunElectroNetwork.ViewModels
                         TextAlignment = System.Windows.TextAlignment.Center,
                         Margin = new System.Windows.Thickness(0, 0, 0, 20)
                     },
-                    new TextBlock
+                    new System.Windows.Controls.TextBlock
                     {
                         Text = "АО 'Оренбургкоммунэлектросеть'",
                         FontSize = 16,
                         Foreground = System.Windows.Media.Brushes.Gray,
                         TextAlignment = System.Windows.TextAlignment.Center
                     },
-                    new TextBlock
+                    new System.Windows.Controls.TextBlock
                     {
                         Text = "Выберите раздел в меню слева для работы",
                         FontSize = 14,
@@ -110,18 +120,24 @@ namespace OrenburgCommunElectroNetwork.ViewModels
 
         private void NavigateToDirectory()
         {
-            // Открываем окно справочника сотрудников
-            var directoryView = new EmployeeDirectoryView();
-            directoryView.Owner = System.Windows.Application.Current.MainWindow;
-            directoryView.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterOwner;
-            directoryView.Show();
+            try
+            {
+                var directoryView = new EmployeeDirectoryView();
+                directoryView.Owner = System.Windows.Application.Current.MainWindow;
+                directoryView.ShowDialog();
 
-            StatusMessage = "Открыт справочник сотрудников";
+                StatusMessage = "Справочник сотрудников закрыт";
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Ошибка при открытии справочника: {ex.Message}", "Ошибка",
+                System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            }
         }
 
         private void NavigateToNews()
         {
-            CurrentContent = new TextBlock
+            CurrentContent = new System.Windows.Controls.TextBlock
             {
                 Text = "Новостная лента - в разработке",
                 FontSize = 18,
@@ -133,7 +149,7 @@ namespace OrenburgCommunElectroNetwork.ViewModels
 
         private void NavigateToCalendar()
         {
-            CurrentContent = new TextBlock
+            CurrentContent = new System.Windows.Controls.TextBlock
             {
                 Text = "Календарь событий - в разработке",
                 FontSize = 18,
@@ -145,7 +161,7 @@ namespace OrenburgCommunElectroNetwork.ViewModels
 
         private void NavigateToAdmin()
         {
-            CurrentContent = new TextBlock
+            CurrentContent = new System.Windows.Controls.TextBlock
             {
                 Text = "Панель администратора - в разработке",
                 FontSize = 18,
@@ -155,4 +171,11 @@ namespace OrenburgCommunElectroNetwork.ViewModels
             StatusMessage = "Панель администратора";
         }
     }
+
+    //public class UserInfo
+    //{
+    //    public string Username { get; set; }
+    //    public bool IsAdmin { get; set; }
+    //    public string FullName { get; set; }
+    //}
 }

@@ -200,9 +200,10 @@
 
                 <!-- Кнопка входа -->
                 <Button Content="Войти в систему" 
+                        IsDefault="True"
                         Command="{Binding LoginCommand}"
                         Style="{StaticResource LoginButtonStyle}"
-                        TabIndex="3"/>
+                        TabIndex="3" Click="Button_Click"/>
 
                 <!-- Информация о системе -->
                 <TextBlock Text="Для демонстрации используйте: admin / admin123" 

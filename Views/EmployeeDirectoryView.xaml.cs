@@ -26,7 +26,10 @@ namespace OrenburgCommunElectroNetwork.Views
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
+            MainWindow mainWindow = new MainWindow();
+            mainWindow.Show();
             this.Close();
+
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)

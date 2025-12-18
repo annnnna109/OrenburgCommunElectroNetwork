@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 
 namespace OrenburgCommunElectroNetwork.ViewModels
 {
-    public class ViewModelBase : INotifyPropertyChanged
+    public abstract class ViewModelBase : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 

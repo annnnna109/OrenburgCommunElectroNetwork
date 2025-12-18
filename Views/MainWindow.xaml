@@ -60,13 +60,13 @@
                 <StackPanel>
                     <Button Content="📋 Справочник" 
                             Command="{Binding NavigateToDirectoryCommand}"
-                            Style="{StaticResource NavigationButtonStyle}"/>
+                            Style="{StaticResource NavigationButtonStyle}" Click="Button_Click"/>
                     <Button Content="📰 Новости" 
                             Command="{Binding NavigateToNewsCommand}"
                             Style="{StaticResource NavigationButtonStyle}"/>
                     <Button Content="📅 Календарь" 
                             Command="{Binding NavigateToCalendarCommand}"
-                            Style="{StaticResource NavigationButtonStyle}"/>
+                            Style="{StaticResource NavigationButtonStyle}" Click="Button_Click_1"/>
 
                     <Separator Margin="0,10,0,10" Background="#5D6D7E"/>
 
