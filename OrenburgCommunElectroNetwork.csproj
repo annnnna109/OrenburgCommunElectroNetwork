@@ -56,7 +56,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Common\RelayCommand.cs" />
-    <Compile Include="Converters\ActiveStatusConverter.cs" />
+    <Compile Include="Converters\BoolToVisibilityConverter.cs" />
+    <Compile Include="Converters\CountToVisibilityConverter.cs" />
+    <Compile Include="Converters\InverseBoolToVisibilityConverter.cs" />
     <Compile Include="Models\CalendarDay.cs" />
     <Compile Include="Settings1.Designer.cs">
       <AutoGen>True</AutoGen>

@@ -25,6 +25,7 @@ namespace OrenburgCommunElectroNetwork.Views
             InitializeComponent();
             DataContext = this;
             SelectedColor = Colors.LightBlue;
+            Loaded += (s, e) => NoteTextBox.Focus();
         }
 
         private void ColorButton_Click(object sender, RoutedEventArgs e)
@@ -47,5 +48,14 @@ namespace OrenburgCommunElectroNetwork.Views
             DialogResult = false;
             Close();
         }
+
+       
+            public NoteEditorWindow(string existingNote, Color existingColor) : this()
+            {
+                NoteText = existingNote;
+                SelectedColor = existingColor;
+            
+            }
     }
+
 }

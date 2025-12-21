@@ -11,17 +11,16 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using OrenburgCommunElectroNetwork.ViewModels;
 
 namespace OrenburgCommunElectroNetwork.Views
 {
-    /// <summary>
-    /// Логика взаимодействия для CalendarWindow.xaml
-    /// </summary>
     public partial class CalendarWindow : Window
     {
         public CalendarWindow()
         {
             InitializeComponent();
+            DataContext = new CalendarViewModel();
         }
     }
 }

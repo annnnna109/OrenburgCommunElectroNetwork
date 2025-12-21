@@ -1,11 +1,8 @@
 ﻿using OrenburgCommunElectroNetwork.Common;
 using OrenburgCommunElectroNetwork.Models;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
@@ -24,7 +21,7 @@ namespace OrenburgCommunElectroNetwork.ViewModels
         public ObservableCollection<Employee> Employees
         {
             get => _filteredEmployees ?? _employees;
-            set
+            private set
             {
                 _employees = value;
                 FilterEmployees();
@@ -36,7 +33,7 @@ namespace OrenburgCommunElectroNetwork.ViewModels
         public ObservableCollection<Department> Departments
         {
             get => _departments;
-            set => SetProperty(ref _departments, value);
+            private set => SetProperty(ref _departments, value);
         }
 
         public string SearchText
@@ -52,7 +49,12 @@ namespace OrenburgCommunElectroNetwork.ViewModels
         public Employee SelectedEmployee
         {
             get => _selectedEmployee;
-            set => SetProperty(ref _selectedEmployee, value);
+            set
+            {
+                SetProperty(ref _selectedEmployee, value);
+                // Обновляем состояние команд при изменении выбранного сотрудника
+                CommandManager.InvalidateRequerySuggested();
+            }
         }
 
         public Department SelectedDepartment
@@ -68,7 +70,7 @@ namespace OrenburgCommunElectroNetwork.ViewModels
         public string StatusMessage
         {
             get => _statusMessage;
-            set => SetProperty(ref _statusMessage, value);
+            private set => SetProperty(ref _statusMessage, value);
         }
 
         public int EmployeesCount => Employees?.Count ?? 0;
@@ -82,12 +84,22 @@ namespace OrenburgCommunElectroNetwork.ViewModels
 
         public EmployeeDirectoryViewModel()
         {
-            SearchCommand = new RelayCommand(_ => FilterEmployees());
-            ClearSearchCommand = new RelayCommand(_ => ClearSearch());
-            RefreshCommand = new RelayCommand(_ => RefreshData());
-            AddEmployeeCommand = new RelayCommand(_ => AddEmployee());
-            EditEmployeeCommand = new RelayCommand(_ => EditEmployee(), _ => SelectedEmployee != null);
-            CallEmployeeCommand = new RelayCommand(_ => CallEmployee(), _ => SelectedEmployee != null && !string.IsNullOrEmpty(SelectedEmployee.Phone));
+            // Инициализация команд
+            SearchCommand = new RelayCommand(FilterEmployees);
+            ClearSearchCommand = new RelayCommand(ClearSearch);
+            RefreshCommand = new RelayCommand(RefreshData);
+            AddEmployeeCommand = new RelayCommand(AddEmployee);
+
+            // Команды с условиями выполнения
+            EditEmployeeCommand = new RelayCommand(
+                execute: EditEmployee,
+                canExecute: () => SelectedEmployee != null
+            );
+
+            CallEmployeeCommand = new RelayCommand(
+                execute: CallEmployee,
+                canExecute: () => SelectedEmployee != null && !string.IsNullOrEmpty(SelectedEmployee?.Phone)
+            );
 
             LoadSampleData();
             StatusMessage = "Готово к работе";
@@ -95,7 +107,7 @@ namespace OrenburgCommunElectroNetwork.ViewModels
 
         private void LoadSampleData()
         {
-            // Sample departments
+            // Пример отделов
             Departments = new ObservableCollection<Department>
             {
                 new Department { Id = 1, Name = "Отдел главного энергетика", Phone = "123-45-67", Description = "Основной технический отдел" },
@@ -105,7 +117,7 @@ namespace OrenburgCommunElectroNetwork.ViewModels
                 new Department { Id = 5, Name = "IT-отдел", Phone = "123-45-71", Description = "Техническая поддержка" }
             };
 
-            // Sample employees
+            // Пример сотрудников
             var employees = new ObservableCollection<Employee>
             {
                 new Employee {
@@ -113,6 +125,7 @@ namespace OrenburgCommunElectroNetwork.ViewModels
                     FullName = "Иванов Иван Иванович",
                     Position = "Главный энергетик",
                     DepartmentId = 1,
+                    DepartmentName = "Отдел главного энергетика",
                     Phone = "123-45-67",
                     Email = "ivanov@okes.orenburg",
                     MobilePhone = "+7-912-345-67-89",
@@ -125,6 +138,7 @@ namespace OrenburgCommunElectroNetwork.ViewModels
                     FullName = "Петров Петр Петрович",
                     Position = "Старший инженер",
                     DepartmentId = 1,
+                    DepartmentName = "Отдел главного энергетика",
                     Phone = "123-45-67",
                     Email = "petrov@okes.orenburg",
                     MobilePhone = "+7-912-345-67-90",
@@ -137,6 +151,7 @@ namespace OrenburgCommunElectroNetwork.ViewModels
                     FullName = "Сидорова Мария Сергеевна",
                     Position = "Специалист абонентского отдела",
                     DepartmentId = 2,
+                    DepartmentName = "Абонентский отдел",
                     Phone = "123-45-68",
                     Email = "sidorova@okes.orenburg",
                     MobilePhone = "+7-912-345-67-91",
@@ -149,6 +164,7 @@ namespace OrenburgCommunElectroNetwork.ViewModels
                     FullName = "Козлов Алексей Викторович",
                     Position = "Инженер-программист",
                     DepartmentId = 5,
+                    DepartmentName = "IT-отдел",
                     Phone = "123-45-71",
                     Email = "kozlov@okes.orenburg",
                     MobilePhone = "+7-912-345-67-92",
@@ -161,6 +177,7 @@ namespace OrenburgCommunElectroNetwork.ViewModels
                     FullName = "Николаева Ольга Дмитриевна",
                     Position = "Главный бухгалтер",
                     DepartmentId = 4,
+                    DepartmentName = "Бухгалтерия",
                     Phone = "123-45-70",
                     Email = "nikolaeva@okes.orenburg",
                     MobilePhone = "+7-912-345-67-93",
@@ -185,7 +202,8 @@ namespace OrenburgCommunElectroNetwork.ViewModels
                 query = query.Where(e =>
                     (e.FullName?.ToLower().Contains(searchLower) ?? false) ||
                     (e.Position?.ToLower().Contains(searchLower) ?? false) ||
-                    (e.Email?.ToLower().Contains(searchLower) ?? false));
+                    (e.Email?.ToLower().Contains(searchLower) ?? false) ||
+                    (e.DepartmentName?.ToLower().Contains(searchLower) ?? false));
             }
 
             if (SelectedDepartment != null)
@@ -215,22 +233,31 @@ namespace OrenburgCommunElectroNetwork.ViewModels
 
         private void AddEmployee()
         {
-            MessageBox.Show("Функция добавления сотрудника будет реализована позже", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show("Функция добавления сотрудника будет реализована позже",
+                          "Информация",
+                          MessageBoxButton.OK,
+                          MessageBoxImage.Information);
         }
 
         private void EditEmployee()
         {
             if (SelectedEmployee != null)
             {
-                MessageBox.Show($"Редактирование сотрудника: {SelectedEmployee.FullName}", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show($"Редактирование сотрудника: {SelectedEmployee.FullName}",
+                              "Информация",
+                              MessageBoxButton.OK,
+                              MessageBoxImage.Information);
             }
         }
 
         private void CallEmployee()
         {
-            if (SelectedEmployee != null)
+            if (SelectedEmployee != null && !string.IsNullOrEmpty(SelectedEmployee.Phone))
             {
-                MessageBox.Show($"Звонок сотруднику: {SelectedEmployee.FullName}\nТелефон: {SelectedEmployee.Phone}", "Звонок", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show($"Звонок сотруднику: {SelectedEmployee.FullName}\nТелефон: {SelectedEmployee.Phone}",
+                              "Звонок",
+                              MessageBoxButton.OK,
+                              MessageBoxImage.Information);
             }
         }
     }

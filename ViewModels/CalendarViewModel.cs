@@ -21,8 +21,32 @@ namespace OrenburgCommunElectroNetwork.ViewModels
 
         public ObservableCollection<MonthItem> Months { get; }
         public ObservableCollection<int> Years { get; }
-        public MonthItem SelectedMonth { get; set; }
-        public int SelectedYear { get; set; }
+
+        private MonthItem _selectedMonth;
+        public MonthItem SelectedMonth
+        {
+            get => _selectedMonth;
+            set
+            {
+                if (SetProperty(ref _selectedMonth, value))
+                {
+                    RefreshCalendar();
+                }
+            }
+        }
+
+        private int _selectedYear;
+        public int SelectedYear
+        {
+            get => _selectedYear;
+            set
+            {
+                if (SetProperty(ref _selectedYear, value))
+                {
+                    RefreshCalendar();
+                }
+            }
+        }
 
         public ObservableCollection<CalendarDay> CalendarDays
         {
@@ -47,7 +71,6 @@ namespace OrenburgCommunElectroNetwork.ViewModels
         public ICommand EditNoteCommand { get; }
         public ICommand DeleteNoteCommand { get; }
         public ICommand RefreshCommand { get; }
-        public ICommand ChangeColorCommand { get; }
 
         public CalendarViewModel()
         {
@@ -67,8 +90,8 @@ namespace OrenburgCommunElectroNetwork.ViewModels
                 Enumerable.Range(DateTime.Now.Year - 10, 21)
             );
 
-            SelectedMonth = Months.First(m => m.Number == _selectedDate.Month);
-            SelectedYear = _selectedDate.Year;
+            _selectedMonth = Months.First(m => m.Number == _selectedDate.Month);
+            _selectedYear = _selectedDate.Year;
 
             SelectedDayNotes = new ObservableCollection<CalendarDay>();
 
@@ -77,13 +100,14 @@ namespace OrenburgCommunElectroNetwork.ViewModels
             EditNoteCommand = new RelayCommand<CalendarDay>(EditNote);
             DeleteNoteCommand = new RelayCommand<CalendarDay>(DeleteNote);
             RefreshCommand = new RelayCommand(RefreshCalendar);
-            ChangeColorCommand = new RelayCommand<string>(ChangeNoteColor);
 
             RefreshCalendar();
         }
 
         private void RefreshCalendar()
         {
+            if (SelectedMonth == null) return;
+
             var days = new ObservableCollection<CalendarDay>();
             var firstDayOfMonth = new DateTime(SelectedYear, SelectedMonth.Number, 1);
             var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
@@ -142,16 +166,16 @@ namespace OrenburgCommunElectroNetwork.ViewModels
 
             SelectedDay = day;
             UpdateSelectedDayNotes();
-
-            if (!day.HasNote)
-            {
-                AddNoteForDay(day);
-            }
         }
 
         private void AddNote()
         {
-            if (SelectedDay == null) return;
+            if (SelectedDay == null)
+            {
+                MessageBox.Show("Выберите день для добавления заметки", "Информация",
+                               MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
 
             if (!SelectedDay.HasNote)
             {
@@ -165,44 +189,58 @@ namespace OrenburgCommunElectroNetwork.ViewModels
 
         private void AddNoteForDay(CalendarDay day)
         {
-            var noteWindow = new NoteEditorWindow
+            try
             {
-                Owner = Application.Current.MainWindow
-            };
+                var noteWindow = new Views.NoteEditorWindow();
+                noteWindow.Owner = Application.Current.MainWindow;
 
-            if (noteWindow.ShowDialog() == true)
+                if (noteWindow.ShowDialog() == true)
+                {
+                    day.HasNote = true;
+                    day.NoteText = noteWindow.NoteText;
+                    day.NoteColor = noteWindow.SelectedColor;
+                    UpdateSelectedDayNotes();
+                    RefreshCalendar();
+                }
+            }
+            catch (Exception ex)
             {
-                day.HasNote = true;
-                day.NoteText = noteWindow.NoteText;
-                day.NoteColor = noteWindow.SelectedColor;
-                UpdateSelectedDayNotes();
-                RefreshCalendar();
+                MessageBox.Show($"Ошибка при создании заметки: {ex.Message}", "Ошибка",
+                               MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         private void EditNote(CalendarDay day)
         {
-            var noteWindow = new NoteEditorWindow
-            {
-                Owner = Application.Current.MainWindow,
-                NoteText = day.NoteText,
-                SelectedColor = day.NoteColor
-            };
+            if (day == null || !day.HasNote) return;
 
-            if (noteWindow.ShowDialog() == true)
+            try
             {
-                day.NoteText = noteWindow.NoteText;
-                day.NoteColor = noteWindow.SelectedColor;
-                UpdateSelectedDayNotes();
-                RefreshCalendar();
+                var noteWindow = new Views.NoteEditorWindow(day.NoteText, day.NoteColor);
+                noteWindow.Owner = Application.Current.MainWindow;
+
+                if (noteWindow.ShowDialog() == true)
+                {
+                    day.NoteText = noteWindow.NoteText;
+                    day.NoteColor = noteWindow.SelectedColor;
+                    UpdateSelectedDayNotes();
+                    RefreshCalendar();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при редактировании заметки: {ex.Message}", "Ошибка",
+                               MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         private void DeleteNote(CalendarDay day)
         {
+            if (day == null || !day.HasNote) return;
+
             var result = MessageBox.Show(
                 "Удалить заметку?",
-                "Подтверждение",
+                "Подтверждение удаления",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question);
 
@@ -211,19 +249,6 @@ namespace OrenburgCommunElectroNetwork.ViewModels
                 day.HasNote = false;
                 day.NoteText = string.Empty;
                 day.NoteColor = Colors.Transparent;
-                UpdateSelectedDayNotes();
-                RefreshCalendar();
-            }
-        }
-
-        private void ChangeNoteColor(string colorName)
-        {
-            if (SelectedDay == null || !SelectedDay.HasNote) return;
-
-            var color = ColorConverter.ConvertFromString(colorName) as Color?;
-            if (color.HasValue)
-            {
-                SelectedDay.NoteColor = color.Value;
                 UpdateSelectedDayNotes();
                 RefreshCalendar();
             }
@@ -248,6 +273,11 @@ namespace OrenburgCommunElectroNetwork.ViewModels
         {
             Number = number;
             Name = name;
+        }
+
+        public override string ToString()
+        {
+            return Name;
         }
     }
 }
