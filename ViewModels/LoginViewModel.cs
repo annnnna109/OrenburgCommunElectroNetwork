@@ -1,13 +1,8 @@
-﻿using OrenburgCommunElectroNetwork.Common;
-using OrenburgCommunElectroNetwork.ViewModels;
-using OrenburgCommunElectroNetwork.Views;
+﻿using OrenburgCommunElectroNetwork.Views;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+
 namespace OrenburgCommunElectroNetwork.ViewModels
 {
     public class LoginViewModel : ViewModelBase
@@ -68,9 +63,8 @@ namespace OrenburgCommunElectroNetwork.ViewModels
 
         public LoginViewModel()
         {
-            LoginCommand = new RelayCommand(_ => Login(), _ => CanLogin());
-            CloseCommand = new RelayCommand(_ => CloseApplication());
-
+            LoginCommand = new RelayCommand(Login, CanLogin);
+            CloseCommand = new RelayCommand(CloseApplication);
             LoadSavedCredentials();
         }
 
@@ -90,16 +84,10 @@ namespace OrenburgCommunElectroNetwork.ViewModels
             {
                 if (ValidateCredentials())
                 {
-                    if (RememberMe)
-                    {
-                        SaveCredentials();
-                    }
-                    else
-                    {
-                        ClearSavedCredentials();
-                    }
+                    if (RememberMe) SaveCredentials();
+                    else ClearSavedCredentials();
 
-                    App.OpenMainWindow();
+                    OpenMainWindow();
                 }
                 else
                 {
@@ -118,33 +106,44 @@ namespace OrenburgCommunElectroNetwork.ViewModels
 
         private bool ValidateCredentials()
         {
+            // Администраторы
             if (Username == "admin" && Password == "admin123")
             {
                 Application.Current.Properties["CurrentUser"] = new UserInfo
                 {
                     Username = "admin",
-                    IsAdmin = true,
-                    FullName = "Администратор Системы"
+                    FullName = "Администратор Системы",
+                    Role = UserRole.Admin,
+                    DepartmentId = 5,
+                    DepartmentName = "IT-отдел"
                 };
                 return true;
             }
-            else if (Username == "user" && Password == "user123")
+
+            // Редакторы
+            else if (Username == "editor" && Password == "editor123")
             {
                 Application.Current.Properties["CurrentUser"] = new UserInfo
                 {
-                    Username = "user",
-                    IsAdmin = false,
-                    FullName = "Пользователь Тестовый"
+                    Username = "editor",
+                    FullName = "Редактор Новостей",
+                    Role = UserRole.Editor,
+                    DepartmentId = 2,
+                    DepartmentName = "Абонентский отдел"
                 };
                 return true;
             }
+
+            // Сотрудники
             else if (Username == "ivanov" && Password == "ivanov123")
             {
                 Application.Current.Properties["CurrentUser"] = new UserInfo
                 {
                     Username = "ivanov",
-                    IsAdmin = false,
-                    FullName = "Иванов Иван Иванович"
+                    FullName = "Иванов Иван Иванович",
+                    Role = UserRole.Employee,
+                    DepartmentId = 1,
+                    DepartmentName = "Отдел главного энергетика"
                 };
                 return true;
             }
@@ -153,8 +152,10 @@ namespace OrenburgCommunElectroNetwork.ViewModels
                 Application.Current.Properties["CurrentUser"] = new UserInfo
                 {
                     Username = "petrov",
-                    IsAdmin = false,
-                    FullName = "Петров Петр Петрович"
+                    FullName = "Петров Петр Петрович",
+                    Role = UserRole.Employee,
+                    DepartmentId = 1,
+                    DepartmentName = "Отдел главного энергетика"
                 };
                 return true;
             }
@@ -162,47 +163,29 @@ namespace OrenburgCommunElectroNetwork.ViewModels
             return false;
         }
 
-        private void CloseApplication()
+        private void OpenMainWindow()
         {
-            Application.Current.Shutdown();
-        }
-
-        private void ClearError()
-        {
-            HasError = false;
-            ErrorMessage = string.Empty;
-        }
-
-        private void ShowError(string message)
-        {
-            ErrorMessage = message;
-            HasError = true;
-        }
-
-        private void LoadSavedCredentials()
-        {
-            try
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                Username = "admin";
-            }
-            catch
-            {
-            }
+                var mainWindow = new Views.MainWindow();
+                mainWindow.Show();
+
+                foreach (Window window in Application.Current.Windows)
+                {
+                    if (window is LoginWindow loginWindow)
+                    {
+                        loginWindow.Close();
+                        break;
+                    }
+                }
+            });
         }
 
-        private void SaveCredentials()
-        {
-        }
-
-        private void ClearSavedCredentials()
-        {
-        }
-    }
-
-    public class UserInfo
-    {
-        public string Username { get; set; }
-        public bool IsAdmin { get; set; }
-        public string FullName { get; set; }
+        private void CloseApplication() => Application.Current.Shutdown();
+        private void ClearError() { HasError = false; ErrorMessage = string.Empty; }
+        private void ShowError(string message) { ErrorMessage = message; HasError = true; }
+        private void LoadSavedCredentials() { Username = ""; RememberMe = false; }
+        private void SaveCredentials() { }
+        private void ClearSavedCredentials() { }
     }
 }

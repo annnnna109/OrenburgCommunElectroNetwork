@@ -1,5 +1,4 @@
-﻿using OrenburgCommunElectroNetwork.Common;
-using OrenburgCommunElectroNetwork.Models;
+﻿using OrenburgCommunElectroNetwork.Models;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -52,7 +51,6 @@ namespace OrenburgCommunElectroNetwork.ViewModels
             set
             {
                 SetProperty(ref _selectedEmployee, value);
-                // Обновляем состояние команд при изменении выбранного сотрудника
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -84,13 +82,11 @@ namespace OrenburgCommunElectroNetwork.ViewModels
 
         public EmployeeDirectoryViewModel()
         {
-            // Инициализация команд
             SearchCommand = new RelayCommand(FilterEmployees);
             ClearSearchCommand = new RelayCommand(ClearSearch);
             RefreshCommand = new RelayCommand(RefreshData);
             AddEmployeeCommand = new RelayCommand(AddEmployee);
 
-            // Команды с условиями выполнения
             EditEmployeeCommand = new RelayCommand(
                 execute: EditEmployee,
                 canExecute: () => SelectedEmployee != null
@@ -107,7 +103,6 @@ namespace OrenburgCommunElectroNetwork.ViewModels
 
         private void LoadSampleData()
         {
-            // Пример отделов
             Departments = new ObservableCollection<Department>
             {
                 new Department { Id = 1, Name = "Отдел главного энергетика", Phone = "123-45-67", Description = "Основной технический отдел" },
@@ -117,7 +112,6 @@ namespace OrenburgCommunElectroNetwork.ViewModels
                 new Department { Id = 5, Name = "IT-отдел", Phone = "123-45-71", Description = "Техническая поддержка" }
             };
 
-            // Пример сотрудников
             var employees = new ObservableCollection<Employee>
             {
                 new Employee {

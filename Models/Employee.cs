@@ -1,172 +1,48 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace OrenburgCommunElectroNetwork.Models
 {
-    public class Employee : BaseEntity
+    public class Employee : INotifyPropertyChanged
     {
+        private int _id;
         private string _fullName;
-        public string FullName
-        {
-            get => _fullName;
-            set
-            {
-                _fullName = value;
-                OnPropertyChanged(nameof(FullName));
-            }
-        }
-
         private string _position;
-        public string Position
-        {
-            get => _position;
-            set
-            {
-                _position = value;
-                OnPropertyChanged(nameof(Position));
-            }
-        }
-
-        private string _phone;
-        public string Phone
-        {
-            get => _phone;
-            set
-            {
-                _phone = value;
-                OnPropertyChanged(nameof(Phone));
-            }
-        }
-
-        private string _email;
-        public string Email
-        {
-            get => _email;
-            set
-            {
-                _email = value;
-                OnPropertyChanged(nameof(Email));
-            }
-        }
-
-        private string _mobilePhone;
-        public string MobilePhone
-        {
-            get => _mobilePhone;
-            set
-            {
-                _mobilePhone = value;
-                OnPropertyChanged(nameof(MobilePhone));
-            }
-        }
-
-        private string _cabinet;
-        public string Cabinet
-        {
-            get => _cabinet;
-            set
-            {
-                _cabinet = value;
-                OnPropertyChanged(nameof(Cabinet));
-            }
-        }
-
-        private string _login;
-        public string Login
-        {
-            get => _login;
-            set
-            {
-                _login = value;
-                OnPropertyChanged(nameof(Login));
-            }
-        }
-
-        private string _passwordHash;
-        public string PasswordHash
-        {
-            get => _passwordHash;
-            set
-            {
-                _passwordHash = value;
-                OnPropertyChanged(nameof(PasswordHash));
-            }
-        }
-
-        private string _photoPath;
-        public string PhotoPath
-        {
-            get => _photoPath;
-            set
-            {
-                _photoPath = value;
-                OnPropertyChanged(nameof(PhotoPath));
-            }
-        }
-
-        private bool _isActive;
-        public bool IsActive
-        {
-            get => _isActive;
-            set
-            {
-                _isActive = value;
-                OnPropertyChanged(nameof(IsActive));
-            }
-        }
-
         private int _departmentId;
-        public int DepartmentId
-        {
-            get => _departmentId;
-            set
-            {
-                _departmentId = value;
-                OnPropertyChanged(nameof(DepartmentId));
-            }
-        }
-
-        private Department _department;
-        public Department Department
-        {
-            get => _department;
-            set
-            {
-                _department = value;
-                OnPropertyChanged(nameof(Department));
-            }
-        }
-
-        private int _roleId;
-        public int RoleId
-        {
-            get => _roleId;
-            set
-            {
-                _roleId = value;
-                OnPropertyChanged(nameof(RoleId));
-            }
-        }
-
+        private string _departmentName;
+        private string _phone;
+        private string _email;
+        private string _mobilePhone;
+        private string _cabinet;
+        private bool _isActive;
         private DateTime _createdAt;
-        public DateTime CreatedAt
+
+        public int Id { get => _id; set => SetField(ref _id, value); }
+        public string FullName { get => _fullName; set => SetField(ref _fullName, value); }
+        public string Position { get => _position; set => SetField(ref _position, value); }
+        public int DepartmentId { get => _departmentId; set => SetField(ref _departmentId, value); }
+        public string DepartmentName { get => _departmentName; set => SetField(ref _departmentName, value); }
+        public string Phone { get => _phone; set => SetField(ref _phone, value); }
+        public string Email { get => _email; set => SetField(ref _email, value); }
+        public string MobilePhone { get => _mobilePhone; set => SetField(ref _mobilePhone, value); }
+        public string Cabinet { get => _cabinet; set => SetField(ref _cabinet, value); }
+        public bool IsActive { get => _isActive; set => SetField(ref _isActive, value); }
+        public DateTime CreatedAt { get => _createdAt; set => SetField(ref _createdAt, value); }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            get => _createdAt;
-            set
-            {
-                _createdAt = value;
-                OnPropertyChanged(nameof(CreatedAt));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public Employee()
+        protected bool SetField<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
         {
-            CreatedAt = DateTime.Now;
-            IsActive = true;
+            if (Equals(field, value)) return false;
+            field = value;
+            OnPropertyChanged(propertyName);
+            return true;
         }
     }
 }
